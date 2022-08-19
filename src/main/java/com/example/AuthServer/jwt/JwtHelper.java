@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.AuthServer.documents.AppUser;
 import com.example.AuthServer.documents.RefreshToken;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -45,6 +47,7 @@ public class JwtHelper {
         return JWT.create()
                 .withIssuer(issuer)
                 .withSubject(user.getId())
+                .withClaim("roles", user.getRoles().stream().toList().toString())
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(new Date().getTime() + accessTokenExpirationMs))
                 .sign(accessTokenAlgorithm);
@@ -88,6 +91,10 @@ public class JwtHelper {
 
     public String getUserIdFromAccessToken(String token) {
         return decodeAccessToken(token).get().getSubject();
+    }
+
+    public String getRolesFromAccessToken(String token) {
+        return decodeAccessToken(token).get().getClaim("roles").asString();
     }
 
     public String getUserIdFromRefreshToken(String token) {
